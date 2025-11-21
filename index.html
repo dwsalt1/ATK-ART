@@ -45,41 +45,35 @@
       <button id="exportCsv" class="small">Ekspor CSV</button>
     </div>
 
-    <form id="form" 
-  style="margin-top:12px;
-         display:grid;
-         grid-template-columns: 1fr 1fr; 
-         gap:20px;
-         align-items:end">
+    <form id="form" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;align-items:end">
+      <div>
+        <label>Nama Item</label>
+        <select id="itemName" required></select>
+      </div>
 
-  <div style="display:flex; flex-direction:column;">
-    <label>Nama Item</label>
-    <select id="itemName" required></select>
-  </div>
+      <div>
+        <label>Kategori</label>
+        <select id="category">
+          <option>ATK</option>
+          <option>ART</option>
+        </select>
+      </div>
 
-  <div style="display:flex; flex-direction:column;">
-    <label>Kategori</label>
-    <select id="category">
-      <option>ATK</option>
-      <option>ART</option>
-    </select>
-  </div>
+      <div>
+        <label>Jumlah</label>
+        <input id="qty" type="number" min="0" value="1" />
+      </div>
 
-  <div style="display:flex; flex-direction:column;">
-    <label>Jumlah</label>
-    <input id="qty" type="number" min="0" value="1" />
-  </div>
+      <div>
+        <label>Lokasi</label>
+        <input id="location" placeholder="Gudang, Ruang Admin..." />
+      </div>
 
-  <div style="display:flex; flex-direction:column;">
-    <label>Lokasi</label>
-    <input id="location" placeholder="Gudang, Ruang Admin..." />
-  </div>
-
-  <div style="grid-column:1/-1;display:flex;gap:8px">
-    <button id="saveBtn">Tambah / Simpan</button>
-    <button id="cancelEdit" type="button" class="small">Batal</button>
-  </div>
-</form>
+      <div style="grid-column:1/-1;display:flex;gap:8px">
+        <button id="saveBtn">Tambah / Simpan</button>
+        <button id="cancelEdit" type="button" class="small">Batal</button>
+      </div>
+    </form>
 
     <table id="table">
       <thead>
