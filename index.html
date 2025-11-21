@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daftar ATK & ART</title>
+  <style>
+    :root{--accent:#2563eb;--muted:#666}
+    body{font-family:Inter, system-ui, -apple-system, Roboto, 'Segoe UI', Arial; margin:0; padding:20px; background:#f7fbff}
+    .container{max-width:980px;margin:0 auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 22px rgba(20,20,60,0.06)}
+    h1{margin:0 0 12px;font-size:20px}
+    .flex{display:flex;gap:8px;align-items:center}
+    input,select,button,textarea{padding:8px 10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px}
+    .search{flex:1}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:8px 10px;border-bottom:1px solid #f0f2f6;text-align:left}
+    th{background:#fbfdff;position:sticky;top:0}
+    .actions button{margin-right:6px}
+    .muted{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .small{padding:6px 8px;font-size:13px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef6ff;color:var(--accent);font-weight:600}
+    @media(max-width:640px){table,thead,tbody,th,td,tr{display:block}thead{display:none}td{padding:10px 0;border-bottom:1px solid #eee}td:before{content:attr(data-label);display:block;font-weight:600;margin-bottom:6px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="flex" style="justify-content:space-between">
+      <div>
+        <h1>Daftar ATK & ART <span class="badge">v1</span></h1>
+        <div class="muted">Simpan, edit, dan ekspor daftar ATK/ART. Data tersimpan di browser.</div>
+      </div>
+      <div style="text-align:right">
+        <button id="printBtn" class="small">Cetak</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input id="search" class="search" placeholder="Cari item, atau lokasi..." />
+      <select id="filterCategory">
+        <option value="">Semua kategori</option>
+        <option>ATK</option>
+        <option>ART</option>
+      </select>
+      <button id="clearFilter" class="small">Reset</button>
+      <button id="exportCsv" class="small">Ekspor CSV</button>
+      <input id="importFile" type="file" accept=".csv" />
+    </div>
+
+    <form id="form" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;align-items:end">
+      <div>
+        <label>Nama Item</label>
+        <select id="itemName" required></select>
+      </div>
+
+      <div>
+        <label>Kategori</label>
+        <select id="category">
+          <option>ATK</option>
+          <option>ART</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Jumlah</label>
+        <input id="qty" type="number" min="0" value="1" />
+      </div>
+
+      <div>
+        <label>Lokasi</label>
+        <input id="location" placeholder="Gudang, Ruang Admin..." />
+      </div>
+
+      <div style="grid-column:1/-1;display:flex;gap:8px">
+        <button id="saveBtn">Tambah / Simpan</button>
+        <button id="cancelEdit" type="button" class="small">Batal</button>
+      </div>
+    </form>
+
+    <table id="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nama Item</th>
+          <th>Kategori</th>
+          <th>Jumlah</th>
+          <th>Lokasi</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="margin-top:10px" class="muted">Tip: Gunakan tombol Ekspor untuk backup CSV.</div>
+  </div>
+
+  <script>
+    /* ------------------------------
+       LIST MASTER ITEM OTOMATIS
+    ------------------------------ */
+    const itemList = {
+      ATK: [
+        "Amplop Coklat Folio","Amplop Coklat MAP","Amplop Coklat uk. 1/2 Folio (ocr)",
+        "Amplop Jaya Putih (Uk. Panjang)","Bantalan Stempel","Binder Klip No.107",
+        "Binder Klip No.111","Binder Klip No.155","Binder Klip No.200","Box File",
+        "Buku Kas 3 Kolom","Buku Tanda Terima NURI","Buku Tanda Terima UBSI",
+        "Buku Telepon","Buku Tulis Folio","Clear Holder","Cutter Besar","Cutter Kecil",
+        "Dispenser Selotip Lion Kecil","Document Keeper","Double Tip Uk. Besar",
+        "Double Tip Uk. Kecil","Fastener","Gantungan Kunci Warna-Warni",
+        "Gunting Uk. Besar","Gunting Uk. Kecil","Isi Cutter Besar","Isi Cutter Kecil",
+        "Isi Spidol Whiteboard","Isi Stepler Besar","Isi Stepler Kecil","Kalkulator",
+        "Kertas Fax","Kertas HVS A4","Kertas HVS Folio","Kertas HVS Kwarto",
+        "Klip Kertas Uk Kecil No.3","Klip Kertas Uk Kecil No.5","Kwitansi NURI",
+        "Kwitansi UBSI","Label Tom & Jerry No.103","Lakban Bening","Lakban Coklat",
+        "Lakban Hitam","Lem Fox","Lem Stick/Pritt","Map Presiden","Odner Besar",
+        "Odner Kecil","Pembatas Buku Besi","Penggaris","Penggaris Besi",
+        "Penghapus Pensil","Penghapus Whiteboard","Pensil 2B","Post-It","Pulpen Biru",
+        "Pulpen Hitam","Pulpen Meja Kotak","Pulpen Merah","Punch Hole",
+        "Rautan Pensil Uk. Kecil","Selotip","Spidol Kecil Biru","Spidol Kecil Hitam",
+        "Spidol Kecil Merah","Spidol Whiteboard Hitam","Spidol Whiteboard Permanen",
+        "Stabillo BOSS","Stempel Tanggal","Stepler MAX (Besar)","Stepler MAX (Kecil)",
+        "Tempat Pensil Resleting","Tinta Stempel Warna Biru Merk Joyko",
+        "Tip-Ex Bentuk Pensil"
+      ],
+      ART: [
+        "Batu Baterai A3 Remote AC & LCD","Batu Baterai Alkaline A2","Bayfresh Semprot",
+        "Cairan Pembersih Kaca Refill","Cairan Pembersih Kaca Refill + Tempat",
+        "Carbol/Tripol/Wipol","Ember","Gayung","Gula Pasir","Kain Pel + Gagang",
+        "Kain Pel Refill Segi Empat","Kamper Buku","Kanebo",
+        "Kantong Plastik Sampah Hitam Besar","Kantong Plastik Warna Putih","Kemoceng",
+        "Keset Kain","Kopi Kapal Api","Lap Serbet/Kaca","Pembersih Lantai (Superpell)",
+        "Pengki","Raid/Baygon","Rinso/Dino 100gr","Sabun Cuci Cream Sunlight",
+        "Sabun Cuci Ekonomi","Sabun Cuci Tangan + Tempat","Sabun Cuci Tangan Refill",
+        "Sabut Kawat","Sapu Ijuk","Sapu Lidi","Sikat Baju",
+        "Sikat Kloset Ujung Bulat","Sikat Lantai","Spon Cuci Piring Uk. Besar",
+        "Mama Lemon","Tali Rapia","Teh Celup Bendera","Tempat Sampah Plastik Besar",
+        "Tempat Sampah Plastik Kecil","Tempat Tissue","Tissue Refill","Vixal/Porstek",
+        "Tempat CD isi 80 Lbr","Lampu Neon Pjg 16 watt LED",
+        "Lampu Neon Pdk 8 watt LED","Lampu Bulb 8 watt","Lampu Tembak 50 watt",
+        "Lampu Tembak 100 watt","Lampu Essential 5 watt"
+      ]
+    };
+
+    const categorySelect = document.getElementById("category");
+    const itemDropdown = document.getElementById("itemName");
+
+    function refreshItemDropdown() {
+      const cat = categorySelect.value;
+      itemDropdown.innerHTML = "";
+      itemList[cat].forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        itemDropdown.appendChild(opt);
+      });
+    }
+
+    categorySelect.addEventListener("change", refreshItemDropdown);
+    refreshItemDropdown();
+
+
+    /* ------------------------------
+          BAGIAN DATA & TABEL
+    ------------------------------ */
+    const LS_KEY = 'daftar_atk_art_2025';
+    let data = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+    let editId = null;
+
+    const $ = id => document.getElementById(id);
+    const tbody = document.querySelector('#table tbody');
+
+    function render() {
+      const q = $('search').value.trim().toLowerCase();
+      const catFilter = $('filterCategory').value;
+      tbody.innerHTML = '';
+
+      const filtered = data.filter(row => {
+        if (catFilter && row.category !== catFilter) return false;
+        if (!q) return true;
+        return [row.name, row.location, row.note, row.unit, row.category]
+          .some(f => (f||'').toLowerCase().includes(q));
+      });
+
+      filtered.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="#">${i+1}</td>
+          <td data-label="Nama Item">${escapeHtml(r.name)}</td>
+          <td data-label="Kategori">${escapeHtml(r.category)}</td>
+          <td data-label="Jumlah">${r.qty}</td>
+          <td data-label="Lokasi">${escapeHtml(r.location)}</td>
+          <td data-label="Aksi" class="actions">
+            <button onclick="editItem('${r.id}')">Edit</button>
+            <button onclick="deleteItem('${r.id}')">Hapus</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveData(){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
+    function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+    function escapeHtml(s){ return (s||'').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+    // FORM SUBMIT
+    document.getElementById('form').addEventListener('submit', e => {
+      e.preventDefault();
+      const item = {
+        id: editId || uid(),
+        name: $('itemName').value.trim(),
+        category: $('category').value,
+        qty: Number($('qty').value)||0,
+        unit: "",
+        location: $('location').value.trim(),
+        note: ""
+      };
+      if (editId) {
+        data = data.map(d => d.id===editId ? item : d);
+        editId = null;
+      } else data.push(item);
+
+      saveData(); render(); e.target.reset(); refreshItemDropdown();
+    });
+
+    window.editItem = function(id){
+      const item = data.find(d => d.id===id);
+      if(!item) return;
+      editId = id;
+      $('itemName').value = item.name;
+      $('category').value = item.category;
+      $('qty').value = item.qty;
+      $('location').value = item.location;
+      refreshItemDropdown();
+      $('itemName').value = item.name;
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+
+    window.deleteItem = function(id){
+      if(!confirm('Hapus item ini?')) return;
+      data = data.filter(d => d.id!==id);
+      saveData(); render();
+    };
+
+    $('search').addEventListener('input', render);
+    $('filterCategory').addEventListener('change', render);
+    $('clearFilter').addEventListener('click', () => { $('search').value=''; $('filterCategory').value=''; render(); });
+
+    // PRINT
+    $('printBtn').addEventListener('click', () => window.print());
+
+    render();
+  </script>
+
+</body>
+</html>
