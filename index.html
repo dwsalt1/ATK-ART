@@ -41,7 +41,6 @@
 
     <div class="controls">
       <input id="search" class="search" placeholder="Cari item atau lokasi..." />
-      <button id="clearFilter" class="small">Reset</button>
       <button id="exportCsv" class="small">Ekspor CSV</button>
     </div>
 
@@ -245,13 +244,43 @@ window.deleteItem = function(id){
 
 /* SEARCH */
 $('search').addEventListener('input', render);
-$('clearFilter').addEventListener('click', () => {
-  $('search').value='';
-  render();
-});
 
 /* PRINT */
 $('printBtn').addEventListener('click', () => window.print());
+
+/* ------------------------------
+   EXPORT CSV
+------------------------------ */
+function exportToCSV() {
+  if (data.length === 0) {
+    alert("Belum ada data untuk diekspor.");
+    return;
+  }
+
+  let csv = "No,Nama Item,Kategori,Jumlah,Lokasi\n";
+
+  data.forEach((row, i) => {
+    csv += [
+      i + 1,
+      `"${row.name}"`,
+      `"${row.category}"`,
+      row.qty,
+      `"${row.location}"`
+    ].join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "daftar-atk-art.csv";
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
+$('exportCsv').addEventListener('click', exportToCSV);
 
 render();
 </script>
