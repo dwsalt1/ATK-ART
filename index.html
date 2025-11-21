@@ -28,7 +28,6 @@
     <div class="flex" style="justify-content:space-between">
       <div>
         <h1>Daftar ATK & ART <span class="badge">v1</span></h1>
-        <div class="muted">Simpan, edit, dan ekspor daftar ATK/ART. Data tersimpan di browser.</div>
       </div>
       <div style="text-align:right">
         <button id="printBtn" class="small">Cetak</button>
@@ -44,10 +43,9 @@
       </select>
       <button id="clearFilter" class="small">Reset</button>
       <button id="exportCsv" class="small">Ekspor CSV</button>
-      <input id="importFile" type="file" accept=".csv" />
     </div>
 
-    <form id="form" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;align-items:end">
+    <form id="form" style="margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;align-items:end">
       <div>
         <label>Nama Item</label>
         <select id="itemName" required></select>
